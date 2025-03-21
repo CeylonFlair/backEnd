@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';  
+import  { getReviews, createReview, getReviewsByProduct } from '../controllers/reviewController.js';
+
 const router = express.Router();
-const { getReviews, createReview, getReviewsByProduct } = require('../controllers/reviewController');
 
 router.get('/', getReviews);  // similar to "/api/reviews"
 router.post('/', createReview);  
 router.get('/:productId', getReviewsByProduct);  // similar to "/api/reviews/:productId"
 
-module.exports = router;
+export default router;  

@@ -1,7 +1,7 @@
-const Review = require('../models/reviewModel');
+import Review from '../models/reviewModel.js';
 
 // Get all reviews--> route GET /api/reviews
-const getReviews = async (req, res) => {
+export const getReviews = async (req, res) => {
     try {
         const reviews = await Review.find();
         res.json(reviews);
@@ -11,7 +11,7 @@ const getReviews = async (req, res) => {
 };
 
 // Create a new review--> route POST /api/reviews
-const createReview = async (req, res) => {
+export const createReview = async (req, res) => {
     const { productId, user, rating, comment } = req.body;
 
     try {
@@ -24,7 +24,7 @@ const createReview = async (req, res) => {
 };
 
 // Get reviews by Product ID --> route GET /api/reviews/:productId
-const getReviewsByProduct = async (req, res) => {
+export const getReviewsByProduct = async (req, res) => {
     try {
         const reviews = await Review.find({ productId: req.params.productId });
         res.json(reviews);
@@ -33,4 +33,4 @@ const getReviewsByProduct = async (req, res) => {
     }
 };
 
-module.exports = { getReviews, createReview, getReviewsByProduct };
+
