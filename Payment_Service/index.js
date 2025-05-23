@@ -1,9 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import './src/config/db.js';
 
 //initialize express app
 const app = express();
+
+//connect database
+connectDB();
 
 //middleware
 app.use(cors());
