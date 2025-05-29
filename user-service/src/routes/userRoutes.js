@@ -8,6 +8,7 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/me', protect, userController.getProfile);
+router.get("/:id", protect, userController.getUserById);
 router.put('/me', protect, upload.single("profilePicture"), userController.updateProfile);
 router.post('/change-password', protect, userController.changePassword);
 

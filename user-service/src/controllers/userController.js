@@ -13,6 +13,18 @@ export const getProfile = async (req, res, next) => {
   }
 };
 
+export const getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select(
+      "-password -isLocked -failedLoginAttempts -twoFactorEnabled -twoFactorSecret"
+    );
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updateProfile = async (req, res, next) => {
   try {
     const { name, email, contactNumber } = req.body;

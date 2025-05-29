@@ -9,6 +9,9 @@ export const registerSchema = Joi.object({
     .required()
     .label("Repeat password")
     .messages({ "any.only": "Passwords do not match" }),
+  roles: Joi.array()
+    .items(Joi.string().valid("user", "artisan"))
+    .default(["user"]),
 });
 
 export const loginSchema = Joi.object({
