@@ -24,7 +24,6 @@ This is the backend for the Payment Service of the CeylonFlair project. It is bu
    ```
    npm run dev
    ```
-   ```
 
 ## Testing Payments
 - This service is configured to use the PayHere sandbox environment for testing payments: [https://www.payhere.lk/]
