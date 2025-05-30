@@ -19,7 +19,7 @@ const paymentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['completed', 'pending', 'canceled', 'failed'],
+      enum: ['completed', 'pending', 'canceled', 'failed', 'charged_back'],
       required: true,
     },
     amount: {
@@ -30,13 +30,14 @@ const paymentSchema = new mongoose.Schema(
     currency: {
       type: String,
       default: 'LKR',
-      enum: ['LKR', 'USD', 'GBP', 'EUR', 'AUD'],  // Currencies compatible with PayHere
+      enum: ['LKR', 'USD', 'GBP', 'EUR', 'AUD'], //compatible with PayHere currencies
     },
     customer_email: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, 'Invalid email format'],
     },
   },
   {
@@ -44,7 +45,7 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
-paymentSchema.index({ order_id: 1 });
-paymentSchema.index({ payment_id: 1 });
+// Compound indexes for faster queries
+paymentSchema.index({ order_id: 1, payment_id: 1 });
 
 export default mongoose.model('Payment', paymentSchema);
