@@ -18,7 +18,12 @@ This is the backend for the Payment Service of the CeylonFlair project. It is bu
 4. Set up your `.env` file with the required environment variables (follow .env file format).
 5. Start the server:
    ```
-   npm start
+   node index.js
+   ```
+   Or, if you have a dev script (with nodemon) in your package.json:
+   ```
+   npm run dev
+   ```
    ```
 
 ## Testing Payments
