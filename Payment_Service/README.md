@@ -23,6 +23,10 @@ This is the backend for the Payment Service of the CeylonFlair project. It is bu
    Or, if you have a dev script (with nodemon) in your package.json:
    ```
    npm run dev
+<<<<<<< HEAD
+=======
+   ```
+>>>>>>> 06aaec3b6a6aa0fe861c03d4a4fb72be489d1a19
    ```
 
 ## Testing Payments
