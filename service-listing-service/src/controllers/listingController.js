@@ -261,8 +261,6 @@ export const getAllListings = async (req, res, next) => {
   }
 };
 
-
-
 export const deleteListing = async (req, res, next) => {
   try {
     const listing = await Listing.findOneAndDelete({
@@ -296,6 +294,45 @@ export const deleteListing = async (req, res, next) => {
     }
 
     res.json({ message: "Listing and images deleted" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateListingRating = async (req, res, next) => {
+  try {
+    const { rating } = req.body;
+    if (typeof rating !== "number" || rating < 0 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating value" });
+    }
+    const listing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      { rating },
+      { new: true }
+    );
+    if (!listing) return res.status(404).json({ message: "Listing not found" });
+    res.json({ message: "Rating updated", rating: listing.rating });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateListingNumReviews = async (req, res, next) => {
+  try {
+    const { numReviews } = req.body;
+    if (!Number.isInteger(numReviews) || numReviews < 0) {
+      return res.status(400).json({ message: "Invalid numReviews value" });
+    }
+    const listing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      { numReviews },
+      { new: true }
+    );
+    if (!listing) return res.status(404).json({ message: "Listing not found" });
+    res.json({
+      message: "Number of reviews updated",
+      numReviews: listing.numReviews,
+    });
   } catch (err) {
     next(err);
   }

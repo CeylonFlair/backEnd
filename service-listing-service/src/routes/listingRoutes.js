@@ -30,5 +30,7 @@ router.put(
   listingController.updateListing
 );
 router.delete("/:id", protect, listingController.deleteListing);
+router.patch("/:id/rating", protect, listingController.updateListingRating);
+router.patch("/:id/numReviews", protect, listingController.updateListingNumReviews);
 
 export default router;
