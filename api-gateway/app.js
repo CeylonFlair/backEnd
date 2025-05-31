@@ -28,7 +28,7 @@ const SERVICES = {
   orders: "http://localhost:5003",
   messaging: "http://localhost:5004",
   reviews: "http://localhost:5005",
-  payments: "http://localhost:5080",
+  payments: "http://localhost:5006",
 };
 
 // Public routes (login, signup, etc.)
