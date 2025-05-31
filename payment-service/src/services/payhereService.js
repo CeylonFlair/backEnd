@@ -1,6 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
-import md5 from "crypto-js/md5";
+import md5 from "crypto-js/md5.js";
 
 const PAYHERE_BASE_URL =
   process.env.PAYHERE_BASE_URL || "https://sandbox.payhere.lk";
