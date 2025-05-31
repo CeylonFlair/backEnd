@@ -59,6 +59,7 @@ export function getPayHereRedirectUrl({
 }) {
   const currency = "LKR";
   const hash = generatePayHereHash({ orderId, amount, currency });
+  const amountFormatted = formatAmount(amount);
   const params = new URLSearchParams({
     merchant_id: MERCHANT_ID,
     return_url: process.env.PAYHERE_RETURN_URL,
@@ -66,7 +67,7 @@ export function getPayHereRedirectUrl({
     notify_url: process.env.PAYHERE_NOTIFY_URL,
     order_id: orderId,
     items: items || "Order Payment",
-    amount: amount.toFixed(2),
+    amount: amountFormatted,
     currency,
     first_name: firstName,
     last_name: lastName,
