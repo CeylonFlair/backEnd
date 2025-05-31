@@ -15,7 +15,7 @@ export const initiatePayment = async (req, res, next) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
     if (order.customerId !== req.user.id)
       return res.status(403).json({ message: "Not your order" });
-    if (order.status !== "cancelled" && order.status !== "completed")
+    if (order.status === "cancelled" || order.status === "completed")
       return res.status(400).json({ message: "Order not payable" });
     // Upsert payment record
     let payment = await Payment.findOneAndUpdate(
