@@ -28,18 +28,77 @@ const SERVICES = {
   orders: "http://localhost:5003",
   messaging: "http://localhost:5004",
   reviews: "http://localhost:5005",
-  payments: "http://localhost:5006",
+  payments: "http://localhost:5080",
 };
 
 // Public routes (login, signup, etc.)
-app.use("/api/auth", proxy(SERVICES.auth));
+app.use(
+  "/api/auth",
+  proxy(SERVICES.auth, {
+    proxyReqPathResolver: (req) => `/api/auth${req.url}`,
+  })
+);
+
+app.use(
+  "/api/users",
+  proxy(SERVICES.auth, {
+    proxyReqPathResolver: (req) => `/api/users${req.url}`,
+  })
+);
 
 // JWT-protected routes
-app.use("/api/listings", authenticateJWT, proxy(SERVICES.listings));
-app.use("/api/orders", authenticateJWT, proxy(SERVICES.orders));
-app.use("/api/messaging", authenticateJWT, proxy(SERVICES.messaging));
-app.use("/api/reviews", authenticateJWT, proxy(SERVICES.reviews));
-app.use("/api/payments", authenticateJWT, proxy(SERVICES.payments));
+
+//Listing
+app.use(
+  "/api/listings",
+  authenticateJWT,
+  proxy(SERVICES.listings, {
+    proxyReqPathResolver: (req) => `/api/listings${req.url}`,
+  })
+);
+
+//Orders
+app.use(
+  "/api/orders",
+  authenticateJWT,
+  proxy(SERVICES.orders, {
+    proxyReqPathResolver: (req) => `/api/orders${req.url}`,
+  })
+);
+
+//Messaging
+app.use(
+  "/api/threads",
+  authenticateJWT,
+  proxy(SERVICES.messaging, {
+    proxyReqPathResolver: (req) => `/api/threads${req.url}`,
+  })
+);
+app.use(
+  "/api/messages",
+  authenticateJWT,
+  proxy(SERVICES.messaging, {
+    proxyReqPathResolver: (req) => `/api/messages${req.url}`,
+  })
+);
+
+// Review rating
+app.use(
+  "/api/reviews",
+  authenticateJWT,
+  proxy(SERVICES.reviews, {
+    proxyReqPathResolver: (req) => `/api/reviews${req.url}`,
+  })
+);
+
+//Payments
+app.use(
+  "/api/payments",
+  authenticateJWT,
+  proxy(SERVICES.payments, {
+    proxyReqPathResolver: (req) => `/api/payments${req.url}`,
+  })
+);
 
 // Health check
 app.get("/health", (req, res) => res.send("API Gateway running"));
