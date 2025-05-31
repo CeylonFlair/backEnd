@@ -1,5 +1,6 @@
 import axios from "axios";
 import crypto from "crypto";
+import md5 from "crypto-js/md5";
 
 const PAYHERE_BASE_URL =
   process.env.PAYHERE_BASE_URL || "https://sandbox.payhere.lk";
@@ -35,14 +36,24 @@ function formatAmount(amount) {
 
 // Generate hash for PayHere redirect
 function generatePayHereHash({ orderId, amount, currency = "LKR" }) {
-  const hashedSecret = crypto
-    .createHash("md5")
-    .update(MERCHANT_SECRET)
-    .digest("hex")
+  const hashedSecret = md5(MERCHANT_SECRET).toString().toUpperCase();
+  // const hashedSecret = crypto
+  //   .createHash("md5")
+  //   .update(MERCHANT_SECRET)
+  //   .digest("hex")
+  //   .toUpperCase();
+  const amountFormatted = parseFloat(amount)
+    .toLocaleString("en-us", { minimumFractionDigits: 2 })
+    .replaceAll(",", "");
+  // const amountFormatted = formatAmount(amount);
+  // const str = MERCHANT_ID + orderId + amountFormatted + currency + hashedSecret;
+  let hash = md5(
+    MERCHANT_ID + orderId + amountFormatted + currency + hashedSecret
+  )
+    .toString()
     .toUpperCase();
-  const amountFormatted = formatAmount(amount);
-  const str = MERCHANT_ID + orderId + amountFormatted + currency + hashedSecret;
-  return crypto.createHash("md5").update(str).digest("hex").toUpperCase();
+  return hash;
+  // return crypto.createHash("md5").update(str).digest("hex").toUpperCase();
 }
 
 // Create PayHere payment URL for redirection
@@ -59,7 +70,9 @@ export function getPayHereRedirectUrl({
 }) {
   const currency = "LKR";
   const hash = generatePayHereHash({ orderId, amount, currency });
-  const amountFormatted = formatAmount(amount);
+  const amountFormatted = parseFloat(amount)
+    .toLocaleString("en-us", { minimumFractionDigits: 2 })
+    .replaceAll(",", "");
   const params = new URLSearchParams({
     merchant_id: MERCHANT_ID,
     return_url: process.env.PAYHERE_RETURN_URL,
