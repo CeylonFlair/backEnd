@@ -26,13 +26,6 @@ export function verifyPayHereSignature(data) {
   return signature === data.md5sig;
 }
 
-// Helper to format amount as PayHere expects (e.g., "1000.00")
-function formatAmount(amount) {
-  return parseFloat(amount).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    useGrouping: false,
-  });
-}
 
 // Generate hash for PayHere redirect
 function generatePayHereHash({ orderId, amount, currency = "LKR" }) {
