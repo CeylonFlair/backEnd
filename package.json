@@ -9,7 +9,8 @@
     "start:review": "cd review-rating-service && node src/index.js",
     "start:listing": "cd service-listing-service && node src/index.js",
     "start:messaging": "cd messaging-service && node src/index.js",
-    "start:payment": "cd Payment_Service && node index.js"
+    "start:payment": "cd Payment_Service && node index.js" ,
+    "heroku-postbuild": "npm install --prefix order-service && npm install --prefix user-service && npm install --prefix review-rating-service && npm install --prefix Payment_Service && npm install --prefix service-listing-service && npm install --prefix messaging-service && npm install --prefix api-gateway"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
