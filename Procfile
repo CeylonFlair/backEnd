@@ -1,1 +1,1 @@
-web: npm start
+web: cd api-gateway && npm start
