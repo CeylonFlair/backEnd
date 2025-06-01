@@ -6,8 +6,10 @@ export const getOrderDetails = async (orderId, token) => {
     const { data } = await axios.get(`${ORDER_SERVICE_URL}/api/orders/${orderId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    console.log(`Fetched order details for order ID ${orderId}:`, data);
     return data;
   } catch {
+    console.error(`Failed to fetch order details for order ID ${orderId}:`, error);
     return null;
   }
 };
@@ -19,8 +21,10 @@ export const notifyOrderPaid = async (orderId, token) => {
       { paymentStatus: 'paid' },
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log(`Notified order service about payment for order ID ${orderId}:`, data);
     return data;
   } catch (error) {
+    console.error(`Failed to notify order service about payment for order ID ${orderId}:`, error);
     console.error('Failed to notify order service:', error);
     return null;
   }
