@@ -5,6 +5,10 @@ import {
   verifyPayHereSignature,
 } from "../services/payhereService.js";
 
+import "dotenv/config";
+
+const ORDER_SERVICE_TOKEN = process.env.ORDER_SERVICE_TOKEN;
+
 // Initiate payment (creates Payment, returns PayHere URL)
 export const initiatePayment = async (req, res, next) => {
   try {
@@ -74,13 +78,10 @@ export const handlePayhereIPN = async (req, res, next) => {
     // Notify order service about payment status
     const orderDetails = await getOrderDetails(
       data.order_id,
-      req.headers.authorization?.split(" ")[1]
+      ORDER_SERVICE_TOKEN
     );
     if (orderDetails) {
-      await notifyOrderPaid(
-        data.order_id,
-        req.headers.authorization?.split(" ")[1]
-      );
+      await notifyOrderPaid(data.order_id, ORDER_SERVICE_TOKEN);
     }
 
     res.status(200).send("OK");
