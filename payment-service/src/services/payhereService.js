@@ -23,6 +23,8 @@ export function verifyPayHereSignature(data) {
     data.status_code +
     md5Secret;
   const signature = crypto.createHash("md5").update(str).digest("hex");
+  console.log("Generated signature:", signature);
+  console.log("Received signature:", data.md5sig);
   return signature === data.md5sig;
 }
 
