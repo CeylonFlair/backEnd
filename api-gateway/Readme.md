@@ -1,7 +1,6 @@
 # API Gateway
 
 This service acts as the API Gateway for the Seyy backend microservices architecture. It proxies requests to the appropriate backend services and handles JWT authentication for protected routes.
-
 ## Services Proxied
 
 - **Auth Service:** `http://localhost:5001`
