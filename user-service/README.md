@@ -1,6 +1,7 @@
 # User Service
 
 User microservice for authentication, registration, profile management, and security features in a MERN microservices setup.
+A user can simply sign up register and manage their profile using this
 
 ## Features
 
