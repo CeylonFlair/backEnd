@@ -75,14 +75,6 @@ export const handlePayhereIPN = async (req, res, next) => {
     payment.payhereData = data;
     await payment.save();
 
-    // Notify order service about payment status
-    const orderDetails = await getOrderDetails(
-      data.order_id,
-      ORDER_SERVICE_TOKEN
-    );
-    if (orderDetails) {
-      await notifyOrderPaid(data.order_id, ORDER_SERVICE_TOKEN);
-    }
 
     res.status(200).send("OK");
   } catch (err) {
