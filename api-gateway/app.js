@@ -91,7 +91,15 @@ app.use(
   })
 );
 
-//Payments
+// Payments IPN (public, no JWT)
+app.use(
+  "/api/payments/ipn",
+  proxy(SERVICES.payments, {
+    proxyReqPathResolver: (req) => `/api/payments/ipn${req.url}`,
+  })
+);
+
+// Payments (protected)
 app.use(
   "/api/payments",
   authenticateJWT,
