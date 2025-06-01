@@ -1,6 +1,7 @@
 import axios from "axios";
 import crypto from "crypto";
 import md5 from "crypto-js/md5.js";
+import 'dotenv/config';
 
 const PAYHERE_BASE_URL =
   process.env.PAYHERE_BASE_URL || "https://sandbox.payhere.lk";
