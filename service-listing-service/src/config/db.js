@@ -1,8 +1,12 @@
 import mongoose from 'mongoose';
+import 'dotenv/config';
+
+
+const MONGO_URI = process.env.LISTING_MONGO_URI || process.env.MONGO_URI;
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
+    await mongoose.connect(MONGO_URI, {
     });
     console.log('MongoDB connected (Service Listing)');
   } catch (err) {

@@ -89,3 +89,30 @@ export const updateOrderStatus = async (req, res, next) => {
     next(err);
   }
 };
+
+export const updatePaymentStatus = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Allow internal service calls to update payment status
+    if (!req.user.service) {
+      // Optionally, restrict to customer or provider
+      if (order.providerId.toString() !== req.user.id) {
+        return res
+          .status(403)
+          .json({ message: "Only providers can change payment status" });
+      }
+    }
+
+    order.paymentStatus = req.body.paymentStatus;
+    await order.save();
+    res.json({
+      message: "Payment status updated successfully",
+      order_id: order._id,
+      new_payment_status: order.paymentStatus,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

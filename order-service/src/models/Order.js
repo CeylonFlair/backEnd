@@ -15,8 +15,8 @@ const orderSchema = new mongoose.Schema(
     notes: { type: String },
     paymentStatus: {
       type: String,
-      enum: ['unpaid', 'paid', 'failed', 'refunded'],
-      default: 'unpaid'
+      enum: ['pending', 'paid', 'failed', 'refunded'],
+      default: 'pending'
     }
   },
   { timestamps: true }

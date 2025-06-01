@@ -1,0 +1,18 @@
+{
+  "name": "backend-monorepo",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run start:gateway\" \"npm run start:auth\" \"npm run start:order\" \"npm run start:review\" \"npm run start:payment\" \"npm run start:listing\" \"npm run start:messaging\"",
+    "start:gateway": "cd api-gateway && node app.js",
+    "start:auth": "cd user-service && node src/index.js",
+    "start:order": "cd order-service && node src/index.js",
+    "start:review": "cd review-rating-service && node src/index.js",
+    "start:listing": "cd service-listing-service && node src/index.js",
+    "start:messaging": "cd messaging-service && node src/index.js",
+    "start:payment": "cd payment-service && node src/index.js" ,
+    "heroku-postbuild": "npm install --prefix order-service && npm install --prefix user-service && npm install --prefix review-rating-service && npm install --prefix payment-service && npm install --prefix service-listing-service && npm install --prefix messaging-service && npm install --prefix api-gateway"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

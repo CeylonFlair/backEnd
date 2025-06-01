@@ -9,3 +9,10 @@ export const createOrderSchema = Joi.object({
 export const updateStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'confirmed', 'in_progress', 'completed', 'cancelled').required()
 });
+
+
+export const updatePaymentStatusSchema = Joi.object({
+  paymentStatus: Joi.string()
+    .valid("pending", "paid", "failed", "refunded")
+    .required(),
+});
