@@ -18,12 +18,11 @@ export function verifyPayHereSignature(data) {
   const str =
     MERCHANT_ID +
     data.order_id +
-    data.payment_id +
     data.payhere_amount +
     data.payhere_currency +
     data.status_code +
     md5Secret;
-  const signature = crypto.createHash("md5").update(str).digest("hex");
+  const signature = crypto.createHash("md5").update(str).digest("hex").toUpperCase();
   console.log("Generated signature:", signature);
   console.log("Received signature:", data.md5sig);
   return signature === data.md5sig;
