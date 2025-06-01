@@ -1,5 +1,5 @@
 import Payment from "../models/Payment.js";
-import { getOrderDetails } from "../services/orderService.js";
+import { getOrderDetails, notifyOrderPaid } from "../services/orderService.js";
 import {
   getPayHereRedirectUrl,
   verifyPayHereSignature,
@@ -73,6 +73,18 @@ export const handlePayhereIPN = async (req, res, next) => {
 
     // Optionally, notify Order Service here (e.g., mark order as paid)
     // Example: await notifyOrderPaid(payment.order, ...);
+
+    // Notify order service about payment status
+    const orderDetails = await getOrderDetails(
+      data.order_id,
+      req.headers.authorization?.split(" ")[1]
+    );
+    if (orderDetails) {
+      await notifyOrderPaid(
+        data.order_id,
+        req.headers.authorization?.split(" ")[1]
+      );
+    }
 
     res.status(200).send("OK");
   } catch (err) {

@@ -12,4 +12,18 @@ export const getOrderDetails = async (orderId, token) => {
   }
 };
 
+export const notifyOrderPaid = async (orderId, token) => {
+  try {
+    const { data } = await axios.patch(
+      `${ORDER_SERVICE_URL}/api/orders/${orderId}/payment-status`,
+      { paymentStatus: 'paid' },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return data;
+  } catch (error) {
+    console.error('Failed to notify order service:', error);
+    return null;
+  }
+}
+
 // Optionally, you can add a notifyOrderPaid() if you want to inform the order service when payment is successful.
