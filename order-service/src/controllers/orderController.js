@@ -95,7 +95,15 @@ export const updatePaymentStatus = async (req, res, next) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    // Optionally, add authorization checks here
+    // Allow internal service calls to update payment status
+    if (!req.user.service) {
+      // Optionally, restrict to customer or provider
+      if (order.providerId.toString() !== req.user.id) {
+        return res
+          .status(403)
+          .json({ message: "Only providers can change payment status" });
+      }
+    }
 
     order.paymentStatus = req.body.paymentStatus;
     await order.save();
