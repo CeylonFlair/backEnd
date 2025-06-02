@@ -14,6 +14,10 @@ export const registerSchema = Joi.object({
     .default(["user"]),
   country: Joi.string().default("Sri Lanka"),
   description: Joi.string().max(200),
+  contactNumber: Joi.string()
+    .pattern(/^\(\d+\)\s\d+$/)
+    .message("Contact number must be in the format (country code) <number>")
+    .optional(),
 });
 
 export const loginSchema = Joi.object({
