@@ -9,7 +9,7 @@ import crypto from "crypto";
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, roles } = req.body;
+    const { name, email, password, roles, country, description } = req.body;
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ message: "User already exists" });
 
@@ -31,6 +31,8 @@ export const register = async (req, res, next) => {
       password: hashed,
       verificationToken: authVerificationCode,
       verificationTokenExpires: expires,
+      country,
+      description,
       roles,
     });
 
