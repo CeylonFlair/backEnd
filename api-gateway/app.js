@@ -2,10 +2,12 @@ import express from "express";
 import proxy from "express-http-proxy";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+app.use(cors());
 
 // JWT middleware for protected routes
 function authenticateJWT(req, res, next) {
