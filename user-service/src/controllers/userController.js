@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import { hashPassword  , comparePassword} from "../utils/hashPassword.js";
+import { hashPassword, comparePassword } from "../utils/hashPassword.js";
 import cloudinary from "../config/cloudinary.js";
 
 export const getProfile = async (req, res, next) => {
@@ -27,13 +27,16 @@ export const getUserById = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const { name, email, contactNumber } = req.body;
+    const { name, email, contactNumber, country, description } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.name = name || user.name;
     user.email = email || user.email;
     user.contactNumber = contactNumber || user.contactNumber;
+    user.country = country || user.country;
+    user.description =
+      description !== undefined ? description : user.description;
 
     // Handle profile picture upload
     if (req.file) {

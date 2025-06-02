@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     contactNumber: { type: String },
     profilePicture: { type: String },
     isVerified: { type: Boolean, default: false },
-    verificationToken: { type: String }, 
+    verificationToken: { type: String },
     verificationTokenExpires: { type: Date },
     resetPasswordOtp: { type: String }, // 6-digit OTP for password reset
     resetPasswordOtpExpires: { type: Date }, // OTP expiration
@@ -17,8 +17,10 @@ const userSchema = new mongoose.Schema(
     twoFactorEnabled: { type: Boolean, default: false },
     twoFactorSecret: { type: String },
     roles: { type: [String], default: ["user"] },
+    country: { type: String, default: "Sri Lanka" },
+    description: { type: String },
   },
   { timestamps: true }
 );
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model("User", userSchema);

@@ -12,6 +12,8 @@ export const registerSchema = Joi.object({
   roles: Joi.array()
     .items(Joi.string().valid("user", "artisan"))
     .default(["user"]),
+  country: Joi.string().default("Sri Lanka"),
+  description: Joi.string().max(200),
 });
 
 export const loginSchema = Joi.object({
