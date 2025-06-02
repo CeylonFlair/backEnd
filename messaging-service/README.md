@@ -1,6 +1,6 @@
 # Messaging/Chat Service
 
-Microservice for real-time chat between users (customers and providers) with file/image upload support via Cloudinary.
+The Messaging/Chat Service provides both RESTful APIs and real-time WebSocket (Socket.IO) endpoints for sending and receiving messages. It supports text, image, and file messages, with all files uploaded to Cloudinary for secure storage and easy access.
 
 ## Features
 
