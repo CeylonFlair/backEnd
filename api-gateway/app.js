@@ -10,6 +10,9 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:5173' , credentials: true }));
 
 
+app.options("*", cors({ origin: "http://localhost:5173", credentials: true }));
+
+
 // JWT middleware for protected routes
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -112,7 +115,7 @@ app.use(
 );
 
 // Health check
-app.get("/health", (req, res) => res.send("API Gateway running"));
+app.get("/", (req, res) => res.send("API Gateway running"));
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`API Gateway listening on port ${PORT}`));
