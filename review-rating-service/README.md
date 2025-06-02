@@ -1,6 +1,6 @@
 # Review & Rating Service
 
-Microservice for managing customer reviews and ratings for listings and providers.
+The Review & Rating Service is a dedicated microservice that manages customer feedback for both service listings and providers within your application
 
 ## Features
 
