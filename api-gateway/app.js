@@ -7,10 +7,7 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173' , credentials: true }));
 
-
-app.options("*", cors({ origin: "http://localhost:5173", credentials: true }));
 
 
 // JWT middleware for protected routes
@@ -36,6 +33,10 @@ const SERVICES = {
   reviews: "http://localhost:5005",
   payments: "http://localhost:5006",
 };
+
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
+app.options("*", cors({ origin: "http://localhost:5173", credentials: true }));
 
 // Public routes (login, signup, etc.)
 app.use(
