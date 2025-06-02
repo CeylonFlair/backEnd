@@ -26,17 +26,17 @@ function authenticateJWT(req, res, next) {
 
 // Service URLs (change as needed)
 const SERVICES = {
-  auth: "https://localhost:5001",
-  listings: "https://localhost:5002",
-  orders: "https://localhost:5003",
-  messaging: "https://localhost:5004",
-  reviews: "https://localhost:5005",
-  payments: "https://localhost:5006",
+  auth: "http://localhost:5001",
+  listings: "http://localhost:5002",
+  orders: "http://localhost:5003",
+  messaging: "http://localhost:5004",
+  reviews: "http://localhost:5005",
+  payments: "http://localhost:5006",
 };
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
-app.options("*", cors({ origin: "http://localhost:5173", credentials: true }));
+// app.options("*", cors({ origin: "http://localhost:5173", credentials: true }));
 
 // Public routes (login, signup, etc.)
 app.use(
