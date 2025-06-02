@@ -1,6 +1,6 @@
 # Order Service
 
-Microservice for handling orders/bookings in a MERN microservices architecture.
+The Order Service is a core microservice responsible for managing the lifecycle of orders or bookings within your application.
 
 ## Features
 - Create bookings/orders for service listings
