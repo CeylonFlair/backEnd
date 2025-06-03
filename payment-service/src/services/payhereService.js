@@ -26,21 +26,20 @@ export function verifyPayHereSignature(data) {
 // Generate hash for PayHere redirect
 function generatePayHereHash({ orderId, amount, currency = "LKR" }) {
   const hashedSecret = md5(MERCHANT_SECRET).toString().toUpperCase();
- 
+
   const amountFormatted = parseFloat(amount)
     .toLocaleString("en-us", { minimumFractionDigits: 2 })
     .replaceAll(",", "");
- 
+
   let hash = md5(
     MERCHANT_ID + orderId + amountFormatted + currency + hashedSecret
   )
     .toString()
     .toUpperCase();
   return hash;
- 
 }
 
-// Create PayHere payment URL for redirection
+// Return PayHere payment data object for frontend POST
 export function getPayHereRedirectUrl({
   orderId,
   amount,
@@ -53,11 +52,16 @@ export function getPayHereRedirectUrl({
   items,
 }) {
   const currency = "LKR";
-  const hash = generatePayHereHash({ orderId, amount, currency });
   const amountFormatted = parseFloat(amount)
     .toLocaleString("en-us", { minimumFractionDigits: 2 })
     .replaceAll(",", "");
-  const params = new URLSearchParams({
+  const hash = generatePayHereHash({
+    orderId,
+    amount: amountFormatted,
+    currency,
+  });
+
+  return {
     merchant_id: MERCHANT_ID,
     return_url: process.env.PAYHERE_RETURN_URL,
     cancel_url: process.env.PAYHERE_CANCEL_URL,
@@ -74,7 +78,5 @@ export function getPayHereRedirectUrl({
     city,
     country: "Sri Lanka",
     hash,
-  });
-  // PayHere wants a POST for server-to-server, but for redirects, just build URL
-  return `${PAYHERE_BASE_URL}/pay/checkout?${params.toString()}`;
+  };
 }
