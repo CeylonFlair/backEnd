@@ -74,7 +74,35 @@ export const getProviderOrders = async (req, res, next) => {
     const orders = await Order.find({ providerId: req.user.id }).sort(
       "-createdAt"
     );
-    res.json(orders);
+    const token = req.headers.authorization?.split(" ")[1];
+
+    // Collect unique user IDs
+    const userIds = new Set();
+    orders.forEach((order) => {
+      userIds.add(order.customerId.toString());
+      userIds.add(order.providerId.toString());
+    });
+
+    // Fetch user info for all involved users
+    const userMap = {};
+    await Promise.all(
+      Array.from(userIds).map(async (userId) => {
+        try {
+          const user = await getUserById(userId, token);
+          userMap[userId] = { name: user.name };
+        } catch (e) {
+          userMap[userId] = { name: null };
+        }
+      })
+    );
+
+    res.json(
+      orders.map((order) => ({
+        ...order.toObject(),
+        customer: userMap[order.customerId.toString()],
+        provider: userMap[order.providerId.toString()],
+      }))
+    );
   } catch (err) {
     next(err);
   }
