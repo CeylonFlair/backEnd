@@ -1,6 +1,6 @@
 # Review & Rating Service
 
-The Review & Rating Service is a dedicated microservice that manages customer feedback for both service listings and providers within your application
+The Review & Rating Service manages customer feedback for both service listings and providers in your application. It allows customers who have completed an order to create, edit, or delete a review for that order. The service also provides endpoints to list reviews for a specific listing, provider, or order. Whenever a review is added, edited, or deleted, it automatically updates the average rating in the Listing Service via API. All write operations require JWT authentication, and all review data is stored in MongoDB. This service helps maintain transparent and up-to-date feedback for services and providers on your platform.
 
 ## Features
 
