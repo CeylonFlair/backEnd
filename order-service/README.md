@@ -1,6 +1,6 @@
 # Order Service
 
-The Order Service is a core microservice responsible for managing the lifecycle of orders or bookings within your application.
+The Order Service is a microservice that manages the entire lifecycle of orders or bookings in your application. It allows customers to create new orders for service listings, lets both customers and providers view their orders, and enables providers to update the status of orders (such as pending, confirmed, in progress, completed, or cancelled). The service integrates with the Service Listing service to fetch listing details and requires JWT authentication for all operations.
 
 ## Features
 - Create bookings/orders for service listings
