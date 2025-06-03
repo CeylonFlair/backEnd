@@ -23,6 +23,9 @@ Microservice for managing artisan service/product listings in a MERN microservic
   - Accepts multipart/form-data with:
     - `coverImage` (file, optional): Cover image for the listing
     - `images` (file[], optional): Up to 5 additional images
+    - `deliveryTime` (integer, required): Delivery time in days
+    - `numberOfRevisions` (integer, required): Number of allowed revisions (-1 for unlimited)
+    - `features` (string[], optional): List of features
     - Other fields as form fields
 - `GET /api/listings/:id` — Get listing by ID
 - `GET /api/listings/:id/with-provider` — Get listing with provider details (calls User Service)
@@ -31,6 +34,9 @@ Microservice for managing artisan service/product listings in a MERN microservic
     - `coverImage` (file, optional): Replaces the cover image
     - `images` (file[], optional): Adds new images
     - `removeImages` (stringified array, optional): URLs to remove
+    - `deliveryTime` (integer, optional): Delivery time in days
+    - `numberOfRevisions` (integer, optional): Number of allowed revisions (-1 for unlimited)
+    - `features` (string[], optional): List of features
     - Other fields as form fields
 - `DELETE /api/listings/:id` — Delete own listing (JWT required)
 

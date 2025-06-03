@@ -5,7 +5,15 @@ import cloudinary from "../config/cloudinary.js";
 
 export const createListing = async (req, res, next) => {
   try {
-    const { title, description, price, category } = req.body;
+    const {
+      title,
+      description,
+      price,
+      category,
+      deliveryTime,
+      numberOfRevisions,
+      features,
+    } = req.body;
     let imageUrls = [];
     let coverImageUrl = null;
     let imageUploadWarning = null;
@@ -73,6 +81,9 @@ export const createListing = async (req, res, next) => {
       category,
       images: imageUrls,
       coverImage: coverImageUrl,
+      deliveryTime,
+      numberOfRevisions,
+      features,
     });
 
     res
@@ -274,7 +285,22 @@ export const updateListing = async (req, res, next) => {
         );
     }
 
-    Object.assign(listing, req.body);
+    // Only update allowed fields
+    const updatableFields = [
+      "title",
+      "description",
+      "price",
+      "category",
+      "deliveryTime",
+      "numberOfRevisions",
+      "features",
+      "coverImage",
+    ];
+    updatableFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        listing[field] = req.body[field];
+      }
+    });
     await listing.save();
     res.json(listing);
   } catch (err) {
@@ -344,6 +370,40 @@ export const deleteListing = async (req, res, next) => {
             );
           }
         }
+      }
+    }
+
+    // Delete cover image from Cloudinary
+    if (listing.coverImage) {
+      // Extract public_id for listings/cover images
+      // This regex will match the path after /upload/ and before the file extension
+      const matches = listing.coverImage.match(
+        /\/upload\/(?:v\d+\/)?([^/.]+\/[^/.]+)\.[a-zA-Z0-9]+$/
+      );
+      let public_id = null;
+      if (matches && matches[1]) {
+        public_id = matches[1];
+      } else {
+        // fallback: try to extract everything after /upload/ and before extension
+        const fallback = listing.coverImage.match(
+          /\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/
+        );
+        public_id = fallback ? fallback[1] : null;
+      }
+      if (public_id) {
+        try {
+          await cloudinary.uploader.destroy(public_id);
+        } catch (e) {
+          console.error(
+            `Failed to delete cover image ${public_id} from Cloudinary:`,
+            e.message
+          );
+        }
+      } else {
+        console.warn(
+          "Could not extract public_id for cover image:",
+          listing.coverImage
+        );
       }
     }
 
