@@ -22,7 +22,7 @@ export const createOrder = async (req, res, next) => {
       bookingDate,
       notes,
     });
-    res.status(201).json({ message: "Order created successfully" });
+    res.status(201).json({  message: "Order created successfully" , orderID : order._id });
   } catch (err) {
     next(err);
   }
