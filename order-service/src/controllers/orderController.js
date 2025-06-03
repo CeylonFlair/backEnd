@@ -22,7 +22,9 @@ export const createOrder = async (req, res, next) => {
       bookingDate,
       notes,
     });
-    res.status(201).json({  message: "Order created successfully" , orderID : order._id });
+    res
+      .status(201)
+      .json({ message: "Order created successfully", orderID: order._id });
   } catch (err) {
     next(err);
   }
@@ -119,7 +121,30 @@ export const getOrderById = async (req, res, next) => {
     ) {
       return res.status(403).json({ message: "Not authorized" });
     }
-    res.json(order);
+
+    const token = req.headers.authorization?.split(" ")[1];
+    let customer = { name: null };
+    let provider = { name: null };
+    try {
+      const customerUser = await getUserById(
+        order.customerId.toString(),
+        token
+      );
+      customer = { name: customerUser.name };
+    } catch {}
+    try {
+      const providerUser = await getUserById(
+        order.providerId.toString(),
+        token
+      );
+      provider = { name: providerUser.name };
+    } catch {}
+
+    res.json({
+      ...order.toObject(),
+      customer,
+      provider,
+    });
   } catch (err) {
     next(err);
   }
