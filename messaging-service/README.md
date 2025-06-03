@@ -1,6 +1,6 @@
 # Messaging/Chat Service
 
-The Messaging/Chat Service provides both RESTful APIs and real-time WebSocket (Socket.IO) endpoints for sending and receiving messages. It supports text, image, and file messages, with all files uploaded to Cloudinary for secure storage and easy access.
+The Messaging/Chat Service enables users to send and receive messages in real time within your application. It provides both REST APIs and WebSocket (Socket.IO) endpoints for messaging, supporting text, images, and files. All files are securely uploaded to Cloudinary. The service manages chat threads and message history in MongoDB, and all operations require JWT authentication for security. This allows users to chat, share files, and see message updates instantly, similar to modern chat apps.
 
 ## Features
 
