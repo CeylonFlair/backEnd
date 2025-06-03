@@ -7,10 +7,33 @@ export const createListing = async (req, res, next) => {
   try {
     const { title, description, price, category } = req.body;
     let imageUrls = [];
+    let coverImageUrl = null;
     let imageUploadWarning = null;
 
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(
+    // Handle coverImage upload
+    if (req.files && req.files.coverImage && req.files.coverImage.length > 0) {
+      try {
+        const file = req.files.coverImage[0];
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "listings/cover" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+        coverImageUrl = result.secure_url;
+      } catch (err) {
+        console.error("Cover image upload failed:", err.message);
+        imageUploadWarning = "Cover image upload failed.";
+      }
+    }
+
+    // Handle images upload
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      const uploadPromises = req.files.images.map(
         (file) =>
           new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
@@ -36,7 +59,7 @@ export const createListing = async (req, res, next) => {
           console.error("Image upload failed:", result.reason.message)
         );
 
-      if (req.files.length > 0 && imageUrls.length === 0) {
+      if (req.files.images.length > 0 && imageUrls.length === 0) {
         imageUploadWarning =
           "All image uploads failed. Listing was created without images.";
       }
@@ -49,6 +72,7 @@ export const createListing = async (req, res, next) => {
       price,
       category,
       images: imageUrls,
+      coverImage: coverImageUrl,
     });
 
     res
@@ -187,9 +211,39 @@ export const updateListing = async (req, res, next) => {
       }
     }
 
-    // Handle new image uploads
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(
+    // Handle coverImage upload (replace existing)
+    if (req.files && req.files.coverImage && req.files.coverImage.length > 0) {
+      try {
+        // Optionally: delete old cover image from Cloudinary
+        if (listing.coverImage) {
+          const matches = listing.coverImage.match(
+            /\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/
+          );
+          const public_id = matches ? matches[1] : null;
+          if (public_id) {
+            await cloudinary.uploader.destroy(public_id);
+          }
+        }
+        const file = req.files.coverImage[0];
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "listings/cover" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+        listing.coverImage = result.secure_url;
+      } catch (err) {
+        console.error("Cover image upload failed:", err.message);
+      }
+    }
+
+    // Handle new images upload
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      const uploadPromises = req.files.images.map(
         (file) =>
           new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
@@ -207,7 +261,7 @@ export const updateListing = async (req, res, next) => {
 
       const newImages = uploadResults
         .filter((result) => result.status === "fulfilled")
-        .map((result) => result.value.secure_url); // or .public_id
+        .map((result) => result.value.secure_url);
 
       if (newImages.length > 0) {
         listing.images = [...listing.images, ...newImages];
