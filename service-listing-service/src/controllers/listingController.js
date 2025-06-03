@@ -327,8 +327,42 @@ export const getAllListings = async (req, res, next) => {
       .skip(skip)
       .limit(limit);
 
+      // Fetch provider info for each listing (in parallel)
+    const token = req.headers.authorization?.split(" ")[1];
+    const providerIds = [
+      ...new Set(listings.map((l) => l.providerId.toString())),
+    ];
+    let providerMap = {};
+    if (token) {
+      await Promise.all(
+        providerIds.map(async (providerId) => {
+          try {
+            const provider = await getUserById(providerId, token);
+            providerMap[providerId] = {
+              name: provider.name,
+              profilePicture: provider.profilePicture,
+            };
+          } catch (e) {
+            providerMap[providerId] = null;
+          }
+        })
+      );
+    }
+
     res.json({
-      listings,
+      listings: listings.map((listing) => {
+        const obj = listing.toObject();
+        const provider = providerMap[listing.providerId.toString()];
+        return {
+          ...obj,
+          provider: provider
+            ? {
+                name: provider.name,
+                profilePicture: provider.profilePicture,
+              }
+            : null,
+        };
+      }),
       pagination: {
         total,
         page,
