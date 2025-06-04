@@ -34,7 +34,15 @@ const SERVICES = {
   payments: "http://localhost:5006",
 };
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://ceylonflair-frontend-56c8eda4af29.herokuapp.com",
+    ],
+    credentials: true,
+  })
+);
 
 // app.options("*", cors({ origin: "http://localhost:5173", credentials: true }));
 
