@@ -1,6 +1,7 @@
 import Review from "../models/Review.js";
 import { getOrderDetails } from "../services/orderService.js";
 import { updateListingAverageRating } from "../services/listingService.js";
+import { getUserById } from "../services/userService.js";
 import mongoose from "mongoose";
 
 // Create review
@@ -17,12 +18,18 @@ export const createReview = async (req, res, next) => {
       req.headers.authorization?.split(" ")[1]
     );
 
-    
+    const disallowedStatuses = ["completed", "cancelled"];
+
     if (
       !order ||
       order.customerId !== req.user.id ||
-      order.status !== "completed"
+      disallowedStatuses.includes(order.status)
     ) {
+      console.log(`${order._id}`);
+      console.log(`${order.customerId}`);
+      console.log(`${req.user.id}`);
+      console.log(`${order.status}`);
+
       return res.status(400).json({ message: "Invalid order for review" });
     }
     // Create review
@@ -38,7 +45,7 @@ export const createReview = async (req, res, next) => {
       order.listingId,
       await calcAvgRating(order.listingId),
       req.headers.authorization?.split(" ")[1],
-      'create'
+      "create"
     );
     res.status(201).json(review);
   } catch (err) {
@@ -63,7 +70,7 @@ export const updateReview = async (req, res, next) => {
       review.listing,
       await calcAvgRating(review.listing),
       req.headers.authorization?.split(" ")[1],
-      'update'
+      "update"
     );
     res.json(review);
   } catch (err) {
@@ -85,7 +92,7 @@ export const deleteReview = async (req, res, next) => {
       review.listing,
       await calcAvgRating(review.listing),
       req.headers.authorization?.split(" ")[1],
-      'delete'
+      "delete"
     );
     res.json({ message: "Review deleted" });
   } catch (err) {
@@ -99,7 +106,28 @@ export const getReviewsForListing = async (req, res, next) => {
     const reviews = await Review.find({ listing: req.params.listingId }).sort(
       "-createdAt"
     );
-    res.json(reviews);
+    // Fetch reviewer details for each review
+    const token = req.headers.authorization?.split(" ")[1];
+    const reviewsWithReviewer = await Promise.all(
+      reviews.map(async (review) => {
+        let reviewerDetails = null;
+        try {
+          const user = await getUserById(review.reviewer, token);
+          reviewerDetails = {
+            profilePicture: user.profilePicture,
+            name: user.name,
+            country: user.country,
+          };
+        } catch (e) {
+          reviewerDetails = null;
+        }
+        return {
+          ...review.toObject(),
+          reviewerDetails,
+        };
+      })
+    );
+    res.json(reviewsWithReviewer);
   } catch (err) {
     next(err);
   }
