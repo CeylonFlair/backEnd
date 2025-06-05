@@ -6,7 +6,7 @@ const USER_SERVICE_URL =
 export const getUserById = async (userId, token) => {
   console.log(`Fetching user info for ID: ${userId} from ${USER_SERVICE_URL}`);
   try {
-    const response = await axios.get(`${USER_SERVICE_URL}/api/users/me`, {
+    const response = await axios.get(`${USER_SERVICE_URL}/api/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
