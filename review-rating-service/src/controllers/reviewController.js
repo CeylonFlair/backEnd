@@ -23,7 +23,8 @@ export const createReview = async (req, res, next) => {
     if (
       !order ||
       order.customerId !== req.user.id ||
-      disallowedStatuses.includes(order.status)
+      // !disallowedStatuses.includes(order.status)
+      order.status !== "completed"
     ) {
       console.log(`${order._id}`);
       console.log(`${order.customerId}`);
