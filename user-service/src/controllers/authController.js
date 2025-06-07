@@ -91,7 +91,8 @@ export const resendOtp = async (req, res, next) => {
       return res.status(400).json({ message: "Email already verified" });
 
     // Generate new OTP and expiration
-    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    // const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const newOtp = 111111; // For testing purposes, using a fixed OTP
     const expires = new Date(Date.now() + 5 * 60 * 1000);
 
     user.verificationToken = newOtp;
