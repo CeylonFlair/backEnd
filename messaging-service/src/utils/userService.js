@@ -1,11 +1,16 @@
 import axios from "axios"; 
 import 'dotenv/config';
 
+
+const USER_SERVICE_URL =
+  process.env.USER_SERVICE_URL || "http://localhost:5001";
+
+
 export const checkParticipantsExist = async (participantIds, token) => {
   const checkResults = await Promise.allSettled(
     participantIds.map((id) =>
       axios
-        .get(`${process.env.USER_SERVICE_URL}/api/users/${id}`, {
+        .get(`${USER_SERVICE_URL}/api/users/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .catch(function (err)  {  
