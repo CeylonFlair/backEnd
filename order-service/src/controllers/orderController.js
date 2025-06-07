@@ -198,3 +198,29 @@ export const updatePaymentStatus = async (req, res, next) => {
     next(err);
   }
 };
+
+// Get associated users (providers for a customer, customers for a provider)
+export const getAssociatedUsers = async (req, res, next) => {
+  try {
+    let match = {};
+    if (req.query.role === "artisan") {
+      // Get customers associated with this provider
+      match = { providerId: req.user.id };
+    } else {
+      // Default: get providers associated with this customer
+      match = { customerId: req.user.id };
+    }
+    const orders = await Order.find(match).select("customerId providerId");
+    const userIds = new Set();
+    orders.forEach((order) => {
+      if (req.query.role === "artisan") {
+        userIds.add(order.customerId.toString());
+      } else {
+        userIds.add(order.providerId.toString());
+      }
+    });
+    res.json({ associatedUserIds: Array.from(userIds) });
+  } catch (err) {
+    next(err);
+  }
+};
