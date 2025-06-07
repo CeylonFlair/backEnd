@@ -32,6 +32,23 @@ export const sendMessage = async (req, res, next) => {
       lastMessage: message._id,
       updatedAt: new Date(),
     });
+
+    // Emit socket event after message is stored
+    const io = req.app.get("io");
+    if (io) {
+      io.to(threadId).emit("newMessage", {
+        _id: message._id,
+        thread: threadId,
+        sender: req.user.id,
+        content: message.content,
+        type: message.type,
+        fileUrl: message.fileUrl,
+        fileName: message.fileName,
+        createdAt: message.createdAt,
+        readBy: message.readBy,
+      });
+    }
+
     res
       .status(201)
       .json({ message: "Message sent successfully", sender: req.user.id });
