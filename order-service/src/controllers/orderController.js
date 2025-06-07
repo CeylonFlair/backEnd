@@ -203,23 +203,39 @@ export const updatePaymentStatus = async (req, res, next) => {
 export const getAssociatedUsers = async (req, res, next) => {
   try {
     let match = {};
+    let getId;
     if (req.query.role === "artisan") {
       // Get customers associated with this provider
       match = { providerId: req.user.id };
+      getId = (order) => order.customerId.toString();
     } else {
       // Default: get providers associated with this customer
       match = { customerId: req.user.id };
+      getId = (order) => order.providerId.toString();
     }
     const orders = await Order.find(match).select("customerId providerId");
-    const userIds = new Set();
-    orders.forEach((order) => {
-      if (req.query.role === "artisan") {
-        userIds.add(order.customerId.toString());
-      } else {
-        userIds.add(order.providerId.toString());
-      }
-    });
-    res.json({ associatedUserIds: Array.from(userIds) });
+    const userIds = Array.from(new Set(orders.map(getId)));
+
+    const token = req.headers.authorization?.split(" ")[1];
+    const users = await Promise.all(
+      userIds.map(async (userId) => {
+        try {
+          const user = await getUserById(userId, token);
+          return {
+            id: userId,
+            name: user.name,
+            profilePicture: user.profilePicture || null,
+          };
+        } catch {
+          return {
+            id: userId,
+            name: null,
+            profilePicture: null,
+          };
+        }
+      })
+    );
+    res.json({ associatedUsers: users });
   } catch (err) {
     next(err);
   }
