@@ -36,6 +36,7 @@ export const sendMessage = async (req, res, next) => {
     // Emit socket event after message is stored
     const io = req.app.get("io");
     if (io) {
+      console.log('IO initialized, emitting newMessage event');
       io.to(threadId).emit("newMessage", {
         _id: message._id,
         thread: threadId,
