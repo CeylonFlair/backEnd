@@ -1,18 +1,59 @@
 import Thread from "../models/Thread.js";
 import Message from "../models/Message.js";
-import { checkParticipantsExist } from "../utils/userService.js";
+import { checkParticipantsExist, getUserById } from "../utils/userService.js";
 
 // Get all threads for a user
 export const getThreads = async (req, res, next) => {
   try {
     const threads = await Thread.find({ participants: req.user.id })
-      .populate("participants", "id name profilePicture")
       .populate({
         path: "lastMessage",
         select: "content type fileUrl createdAt",
       })
       .sort("-updatedAt");
-    res.json(threads);
+
+    // Collect all unique participant IDs
+    const userIds = new Set();
+    threads.forEach((thread) => {
+      thread.participants.forEach((id) => userIds.add(id.toString()));
+    });
+
+    // Fetch user info from user service
+    const token = req.headers.authorization?.split(" ")[1];
+    const userMap = {};
+    await Promise.all(
+      Array.from(userIds).map(async (userId) => {
+        try {
+          const user = await getUserById(userId, token);
+          userMap[userId] = {
+            id: userId,
+            name: user.name,
+            profilePicture: user.profilePicture || null,
+          };
+        } catch {
+          userMap[userId] = {
+            id: userId,
+            name: null,
+            profilePicture: null,
+          };
+        }
+      })
+    );
+
+    // Attach user info to each thread's participants
+    const threadsWithUserInfo = threads.map((thread) => ({
+      ...thread.toObject(),
+      participants: thread.participants.map(
+        (id) =>
+          userMap[id.toString()] || {
+            id: id.toString(),
+            name: null,
+            profilePicture: null,
+          }
+      ),
+    }));
+
+    res.json(threadsWithUserInfo);
   } catch (err) {
     next(err);
   }
@@ -48,7 +89,7 @@ export const createThread = async (req, res, next) => {
 
     const token = req.headers.authorization?.split(" ")[1];
 
-    const allExist = await checkParticipantsExist(participantIds, token,);
+    const allExist = await checkParticipantsExist(participantIds, token);
     if (!allExist) {
       return res
         .status(400)

@@ -20,3 +20,21 @@ export const checkParticipantsExist = async (participantIds, token) => {
   );
   return !checkResults.some((r) => !r.value || r.value.status === 404);
 };
+
+
+
+export const getUserById = async (userId, token) => {
+  try {
+    const response = await axios.get(
+      `${USER_SERVICE_URL}/api/users/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error("Failed to fetch user info");
+  }
+};
