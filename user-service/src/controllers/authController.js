@@ -137,6 +137,7 @@ export const login = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+  
 };
 
 export const resetPasswordRequest = async (req, res, next) => {
