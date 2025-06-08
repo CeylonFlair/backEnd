@@ -10,9 +10,20 @@
     "start:listing": "cd service-listing-service && node src/index.js",
     "start:messaging": "cd messaging-service && node src/index.js",
     "start:payment": "cd payment-service && node src/index.js" ,
+    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:order\" \"npm run dev:review\" \"npm run dev:payment\" \"npm run dev:listing\" \"npm run dev:messaging\"",
+    "dev:gateway": "cd api-gateway && nodemon app.js",
+    "dev:auth": "cd user-service && nodemon src/index.js",
+    "dev:order": "cd order-service && nodemon src/index.js",
+    "dev:review": "cd review-rating-service && nodemon src/index.js",
+    "dev:listing": "cd service-listing-service && nodemon src/index.js",
+    "dev:messaging": "cd messaging-service && nodemon src/index.js",
+    "dev:payment": "cd payment-service && nodemon src/index.js",
     "heroku-postbuild": "npm install --prefix order-service && npm install --prefix user-service && npm install --prefix review-rating-service && npm install --prefix payment-service && npm install --prefix service-listing-service && npm install --prefix messaging-service && npm install --prefix api-gateway"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   }
 }

@@ -6,13 +6,20 @@ import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 
 const setupSocket = (server) => {
   const io = new Server(server, {
-    cors: { origin: "*" },
+    cors: {
+      origin: [
+        "http://localhost:5173",
+        "https://ceylonflair-frontend-56c8eda4af29.herokuapp.com",
+      ],
+    },
   });
 
   io.use(socketAuth);
 
   io.on("connection", (socket) => {
+    
     const userId = socket.user.id;
+    console.log(`User connected: ${userId}`);
 
     // Join all user's threads
     Thread.find({ participants: userId }).then((threads) => {
