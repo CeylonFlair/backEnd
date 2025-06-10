@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import { getListingById } from "../services/listingService.js";
+import { getUserById } from "../services/userService.js";
 
 // Customer creates new order/booking
 export const createOrder = async (req, res, next) => {
@@ -21,7 +22,9 @@ export const createOrder = async (req, res, next) => {
       bookingDate,
       notes,
     });
-    res.status(201).json({ message: "Order created successfully" });
+    res
+      .status(201)
+      .json({ message: "Order created successfully", orderID: order._id });
   } catch (err) {
     next(err);
   }
@@ -33,7 +36,35 @@ export const getMyOrders = async (req, res, next) => {
     const orders = await Order.find({ customerId: req.user.id }).sort(
       "-createdAt"
     );
-    res.json(orders);
+    const token = req.headers.authorization?.split(" ")[1];
+
+    // Collect unique user IDs
+    const userIds = new Set();
+    orders.forEach((order) => {
+      userIds.add(order.customerId.toString());
+      userIds.add(order.providerId.toString());
+    });
+
+    // Fetch user info for all involved users
+    const userMap = {};
+    await Promise.all(
+      Array.from(userIds).map(async (userId) => {
+        try {
+          const user = await getUserById(userId, token);
+          userMap[userId] = { name: user.name };
+        } catch (e) {
+          userMap[userId] = { name: null };
+        }
+      })
+    );
+
+    res.json(
+      orders.map((order) => ({
+        ...order.toObject(),
+        customer: userMap[order.customerId.toString()],
+        provider: userMap[order.providerId.toString()],
+      }))
+    );
   } catch (err) {
     next(err);
   }
@@ -45,7 +76,35 @@ export const getProviderOrders = async (req, res, next) => {
     const orders = await Order.find({ providerId: req.user.id }).sort(
       "-createdAt"
     );
-    res.json(orders);
+    const token = req.headers.authorization?.split(" ")[1];
+
+    // Collect unique user IDs
+    const userIds = new Set();
+    orders.forEach((order) => {
+      userIds.add(order.customerId.toString());
+      userIds.add(order.providerId.toString());
+    });
+
+    // Fetch user info for all involved users
+    const userMap = {};
+    await Promise.all(
+      Array.from(userIds).map(async (userId) => {
+        try {
+          const user = await getUserById(userId, token);
+          userMap[userId] = { name: user.name };
+        } catch (e) {
+          userMap[userId] = { name: null };
+        }
+      })
+    );
+
+    res.json(
+      orders.map((order) => ({
+        ...order.toObject(),
+        customer: userMap[order.customerId.toString()],
+        provider: userMap[order.providerId.toString()],
+      }))
+    );
   } catch (err) {
     next(err);
   }
@@ -62,7 +121,30 @@ export const getOrderById = async (req, res, next) => {
     ) {
       return res.status(403).json({ message: "Not authorized" });
     }
-    res.json(order);
+
+    const token = req.headers.authorization?.split(" ")[1];
+    let customer = { name: null };
+    let provider = { name: null };
+    try {
+      const customerUser = await getUserById(
+        order.customerId.toString(),
+        token
+      );
+      customer = { name: customerUser.name };
+    } catch {}
+    try {
+      const providerUser = await getUserById(
+        order.providerId.toString(),
+        token
+      );
+      provider = { name: providerUser.name };
+    } catch {}
+
+    res.json({
+      ...order.toObject(),
+      customer,
+      provider,
+    });
   } catch (err) {
     next(err);
   }
@@ -112,6 +194,48 @@ export const updatePaymentStatus = async (req, res, next) => {
       order_id: order._id,
       new_payment_status: order.paymentStatus,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get associated users (providers for a customer, customers for a provider)
+export const getAssociatedUsers = async (req, res, next) => {
+  try {
+    let match = {};
+    let getId;
+    if (req.query.role === "artisan") {
+      // Get customers associated with this provider
+      match = { providerId: req.user.id };
+      getId = (order) => order.customerId.toString();
+    } else {
+      // Default: get providers associated with this customer
+      match = { customerId: req.user.id };
+      getId = (order) => order.providerId.toString();
+    }
+    const orders = await Order.find(match).select("customerId providerId");
+    const userIds = Array.from(new Set(orders.map(getId)));
+
+    const token = req.headers.authorization?.split(" ")[1];
+    const users = await Promise.all(
+      userIds.map(async (userId) => {
+        try {
+          const user = await getUserById(userId, token);
+          return {
+            id: userId,
+            name: user.name,
+            profilePicture: user.profilePicture || null,
+          };
+        } catch {
+          return {
+            id: userId,
+            name: null,
+            profilePicture: null,
+          };
+        }
+      })
+    );
+    res.json({ associatedUsers: users });
   } catch (err) {
     next(err);
   }

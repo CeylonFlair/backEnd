@@ -18,6 +18,7 @@ router.post(
 );
 router.get("/my", protect, orderController.getMyOrders);
 router.get("/provider", protect, orderController.getProviderOrders);
+router.get("/associated-users", protect, orderController.getAssociatedUsers);
 router.get("/:id", protect, orderController.getOrderById);
 router.patch(
   "/:id/status",

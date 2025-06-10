@@ -9,7 +9,15 @@ import crypto from "crypto";
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, roles } = req.body;
+    const {
+      name,
+      email,
+      password,
+      roles,
+      country,
+      description,
+      contactNumber,
+    } = req.body;
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ message: "User already exists" });
 
@@ -21,6 +29,7 @@ export const register = async (req, res, next) => {
     const authVerificationCode = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
+    // const authVerificationCode = '111111';
 
     // 5 minutes expiration
     const expires = new Date(Date.now() + 5 * 60 * 1000);
@@ -31,6 +40,9 @@ export const register = async (req, res, next) => {
       password: hashed,
       verificationToken: authVerificationCode,
       verificationTokenExpires: expires,
+      country,
+      description,
+      contactNumber,
       roles,
     });
 
@@ -81,6 +93,7 @@ export const resendOtp = async (req, res, next) => {
 
     // Generate new OTP and expiration
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    // const newOtp = '111111'; // For testing purposes, using a fixed OTP
     const expires = new Date(Date.now() + 5 * 60 * 1000);
 
     user.verificationToken = newOtp;
@@ -124,6 +137,7 @@ export const login = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+  
 };
 
 export const resetPasswordRequest = async (req, res, next) => {

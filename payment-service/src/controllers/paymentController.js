@@ -34,7 +34,7 @@ export const initiatePayment = async (req, res, next) => {
       { upsert: true, new: true }
     );
     // Build PayHere URL (use order/customer details for form fields)
-    const url = getPayHereRedirectUrl({
+    const data = getPayHereRedirectUrl({
       orderId,
       amount: order.price,
       firstName: order.customerFirstName || req.user.firstName || "Customer",
@@ -45,7 +45,7 @@ export const initiatePayment = async (req, res, next) => {
       city: order.customerCity || "Colombo",
       items: order.itemTitle || "Order Payment",
     });
-    res.json({ paymentId: payment._id, url });
+    res.json({ paymentId: payment._id, data });
   } catch (err) {
     next(err);
   }

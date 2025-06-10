@@ -1,16 +1,47 @@
 import Listing from "../models/Listing.js";
-import { buildQuery } from "../utils/buildQuery.js";
+import { buildQuery, getSortOption } from "../utils/buildQuery.js";
 import { getUserById } from "../services/userService.js";
 import cloudinary from "../config/cloudinary.js";
 
 export const createListing = async (req, res, next) => {
   try {
-    const { title, description, price, category } = req.body;
+    const {
+      title,
+      description,
+      price,
+      category,
+      deliveryTime,
+      numberOfRevisions,
+      features,
+    } = req.body;
     let imageUrls = [];
+    let coverImageUrl = null;
     let imageUploadWarning = null;
 
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(
+    // Handle coverImage upload
+    if (req.files && req.files.coverImage && req.files.coverImage.length > 0) {
+      try {
+        const file = req.files.coverImage[0];
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "listings/cover" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+        coverImageUrl = result.secure_url;
+      } catch (err) {
+        console.error("Cover image upload failed:", err.message);
+        imageUploadWarning = "Cover image upload failed.";
+      }
+    }
+
+    // Handle images upload
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      const uploadPromises = req.files.images.map(
         (file) =>
           new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
@@ -36,7 +67,7 @@ export const createListing = async (req, res, next) => {
           console.error("Image upload failed:", result.reason.message)
         );
 
-      if (req.files.length > 0 && imageUrls.length === 0) {
+      if (req.files.images.length > 0 && imageUrls.length === 0) {
         imageUploadWarning =
           "All image uploads failed. Listing was created without images.";
       }
@@ -49,6 +80,10 @@ export const createListing = async (req, res, next) => {
       price,
       category,
       images: imageUrls,
+      coverImage: coverImageUrl,
+      deliveryTime,
+      numberOfRevisions,
+      features,
     });
 
     res
@@ -187,9 +222,39 @@ export const updateListing = async (req, res, next) => {
       }
     }
 
-    // Handle new image uploads
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(
+    // Handle coverImage upload (replace existing)
+    if (req.files && req.files.coverImage && req.files.coverImage.length > 0) {
+      try {
+        // Optionally: delete old cover image from Cloudinary
+        if (listing.coverImage) {
+          const matches = listing.coverImage.match(
+            /\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/
+          );
+          const public_id = matches ? matches[1] : null;
+          if (public_id) {
+            await cloudinary.uploader.destroy(public_id);
+          }
+        }
+        const file = req.files.coverImage[0];
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "listings/cover" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          stream.end(file.buffer);
+        });
+        listing.coverImage = result.secure_url;
+      } catch (err) {
+        console.error("Cover image upload failed:", err.message);
+      }
+    }
+
+    // Handle new images upload
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      const uploadPromises = req.files.images.map(
         (file) =>
           new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
@@ -207,7 +272,7 @@ export const updateListing = async (req, res, next) => {
 
       const newImages = uploadResults
         .filter((result) => result.status === "fulfilled")
-        .map((result) => result.value.secure_url); // or .public_id
+        .map((result) => result.value.secure_url);
 
       if (newImages.length > 0) {
         listing.images = [...listing.images, ...newImages];
@@ -220,7 +285,22 @@ export const updateListing = async (req, res, next) => {
         );
     }
 
-    Object.assign(listing, req.body);
+    // Only update allowed fields
+    const updatableFields = [
+      "title",
+      "description",
+      "price",
+      "category",
+      "deliveryTime",
+      "numberOfRevisions",
+      "features",
+      "coverImage",
+    ];
+    updatableFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        listing[field] = req.body[field];
+      }
+    });
     await listing.save();
     res.json(listing);
   } catch (err) {
@@ -238,17 +318,54 @@ export const getAllListings = async (req, res, next) => {
       parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    // Sorting
+    const sort = getSortOption(req.query.sort);
+
     // Get total count for pagination info
     const total = await Listing.countDocuments(filter);
 
-    // Fetch paginated results
+    // Fetch paginated results with sorting
     const listings = await Listing.find(filter)
-      .sort("-createdAt")
+      .sort(sort)
       .skip(skip)
       .limit(limit);
 
+    // Fetch provider info for each listing (in parallel)
+    const token = req.headers.authorization?.split(" ")[1];
+    const providerIds = [
+      ...new Set(listings.map((l) => l.providerId.toString())),
+    ];
+    let providerMap = {};
+    if (token) {
+      await Promise.all(
+        providerIds.map(async (providerId) => {
+          try {
+            const provider = await getUserById(providerId, token);
+            providerMap[providerId] = {
+              name: provider.name,
+              profilePicture: provider.profilePicture,
+            };
+          } catch (e) {
+            providerMap[providerId] = null;
+          }
+        })
+      );
+    }
+
     res.json({
-      listings,
+      listings: listings.map((listing) => {
+        const obj = listing.toObject();
+        const provider = providerMap[listing.providerId.toString()];
+        return {
+          ...obj,
+          provider: provider
+            ? {
+                name: provider.name,
+                profilePicture: provider.profilePicture,
+              }
+            : null,
+        };
+      }),
       pagination: {
         total,
         page,
@@ -290,6 +407,40 @@ export const deleteListing = async (req, res, next) => {
             );
           }
         }
+      }
+    }
+
+    // Delete cover image from Cloudinary
+    if (listing.coverImage) {
+      // Extract public_id for listings/cover images
+      // This regex will match the path after /upload/ and before the file extension
+      const matches = listing.coverImage.match(
+        /\/upload\/(?:v\d+\/)?([^/.]+\/[^/.]+)\.[a-zA-Z0-9]+$/
+      );
+      let public_id = null;
+      if (matches && matches[1]) {
+        public_id = matches[1];
+      } else {
+        // fallback: try to extract everything after /upload/ and before extension
+        const fallback = listing.coverImage.match(
+          /\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z0-9]+$/
+        );
+        public_id = fallback ? fallback[1] : null;
+      }
+      if (public_id) {
+        try {
+          await cloudinary.uploader.destroy(public_id);
+        } catch (e) {
+          console.error(
+            `Failed to delete cover image ${public_id} from Cloudinary:`,
+            e.message
+          );
+        }
+      } else {
+        console.warn(
+          "Could not extract public_id for cover image:",
+          listing.coverImage
+        );
       }
     }
 
