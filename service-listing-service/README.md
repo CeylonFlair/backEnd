@@ -19,6 +19,13 @@ Microservice for managing artisan service/product listings in a MERN microservic
 ## Endpoints
 
 - `GET /api/listings` — List/search/filter all listings (public)
+  - **Query parameters:**
+    - `category` — Filter by category
+    - `minPrice` — Minimum price (budget)
+    - `maxPrice` — Maximum price (budget)
+    - `sort` — Sort by: `popular` (most rating/reviews), `newest` (default: newest first)
+    - `keyword` — Search by keyword in title/description
+    - `page`, `limit` — Pagination
 - `POST /api/listings` — Create new listing (provider only, JWT required)
   - Accepts multipart/form-data with:
     - `coverImage` (file, optional): Cover image for the listing
@@ -46,11 +53,15 @@ Most listing endpoints support pagination via query parameters:
 
 - `page` (default: 1): The page number to retrieve.
 - `limit` (default: 10): The number of listings per page.
+- `category`: Filter by category.
+- `minPrice`, `maxPrice`: Filter by price range.
+- `sort`: Sort by `popular` or `newest` (default: `newest`).
+- `keyword`: Search by keyword in title/description.
 
 **Example usage:**
 
 ```
-GET /api/listings?page=2&limit=5
+GET /api/listings?category=Jewelry%20%26%20Accessories&minPrice=100&maxPrice=500&sort=popular&page=1&limit=10
 GET /api/listings/123456/with-provider?page=1&limit=20
 ```
 

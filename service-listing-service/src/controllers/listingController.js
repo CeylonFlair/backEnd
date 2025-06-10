@@ -1,5 +1,5 @@
 import Listing from "../models/Listing.js";
-import { buildQuery } from "../utils/buildQuery.js";
+import { buildQuery, getSortOption } from "../utils/buildQuery.js";
 import { getUserById } from "../services/userService.js";
 import cloudinary from "../config/cloudinary.js";
 
@@ -318,16 +318,19 @@ export const getAllListings = async (req, res, next) => {
       parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    // Sorting
+    const sort = getSortOption(req.query.sort);
+
     // Get total count for pagination info
     const total = await Listing.countDocuments(filter);
 
-    // Fetch paginated results
+    // Fetch paginated results with sorting
     const listings = await Listing.find(filter)
-      .sort("-createdAt")
+      .sort(sort)
       .skip(skip)
       .limit(limit);
 
-      // Fetch provider info for each listing (in parallel)
+    // Fetch provider info for each listing (in parallel)
     const token = req.headers.authorization?.split(" ")[1];
     const providerIds = [
       ...new Set(listings.map((l) => l.providerId.toString())),
